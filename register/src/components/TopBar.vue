@@ -3,29 +3,44 @@
     <div class="logo">
       🏥 XXX医院线上挂号系统
     </div>
-    <div class="user-icon">
-      👤
+    <div class="user-section" v-if="userStore.role">
+      <span class="user-info">👤 {{ userStore.username }}</span>
+      <button class="logout-btn" @click="logout">退出</button>
     </div>
   </header>
 </template>
 
+<script setup>
+import { useUserStore } from '@/stores/userStore'
+import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
+
+const userStore = useUserStore()
+const router = useRouter()
+
+const logout = () => {
+  userStore.logout()
+  ElMessage.success('退出成功')
+  router.push('/entry')
+}
+</script>
+
 <style scoped>
 .top-bar {
-  height: 60px;
+  height: 100px;
   background-color: #0056ba;
   color: white;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 100px;
-  padding: 12 20px;
+  padding: 0 20px;
   font-size: 40px;
   font-weight: bold;
-  position: fixed;         /* ✅ 固定在页面顶部 */
+  position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  z-index: 999;            /* ✅ 最高层级，确保不被遮罩层盖住 */
+  z-index: 999;
 }
 
 .logo {
@@ -34,8 +49,24 @@
   gap: 8px;
 }
 
-.user-icon {
-  font-size: 24px;
+/* 新增用户信息区域样式 */
+.user-section {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 18px;
+}
+
+.logout-btn {
+  background: white;
+  color: #0056ba;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
   cursor: pointer;
+  font-size: 16px;
+}
+.logout-btn:hover {
+  background: #f5f5f5;
 }
 </style>

@@ -29,23 +29,29 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import TopBar from '../components/TopBar.vue'
 import { useRoute } from 'vue-router'
+import { useUserStore } from '../stores/userStore'  // ✅ 路径根据实际位置调整
+const userStore = useUserStore()
 const route = useRoute()
 const role = route.query.role || 'patient'
 const router = useRouter()
 const username = ref('')
 const password = ref('')
 
-//const handleLogin = () => {
-  // 暂时直接跳转（后续可接后端验证）
+// const handleLogin = () => {
+//   userStore.setUser({
+//             username: '123',
+//             role: 'patient',
+//             token:  ''
+//         })
 //  if (role === 'doctor')
-//    router.push('/doctor')
-//  else if (role === 'admin')
-//    router.push('/admin')
+//    router.push('/doctor/dashboard')
+//  else if (role === 'administrator')
+//    router.push('/administrator/dashboard')
 //  else
-//    router.push('/dashboard')
+//    router.push('/patient/dashboard')
 
 // }
- const handleLogin = async () => {
+const handleLogin = async () => {
    try {
      const res = await axios.post('http://localhost:8000/login/', {
        username: username.value,
@@ -53,13 +59,20 @@ const password = ref('')
      })
 
      if (res.data.status === 'success') {
+        // ✅ 设置用户状态（可用于权限控制）
+        userStore.setUser({
+            username: username.value,
+            role: role,
+            token: res.data.token || ''
+        })
+
        ElMessage.success('登录成功')
         if (role === 'doctor')
-           router.push('/doctor')
+           router.push('/doctor/dashboard')
         else if (role === 'admin')
-           router.push('/admin')
+           router.push('/administrator/dashboard')
         else
-           router.push('/dashboard')
+           router.push('/patient/dashboard')
      } else {
        ElMessage.error(res.data.message || '用户名或密码错误')
      }

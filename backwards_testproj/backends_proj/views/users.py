@@ -11,39 +11,6 @@ from backends_proj.serializers import *
 from backends_proj.models import *
 from rest_framework.exceptions import ValidationError
 
-# @api_view(['POST'])
-# def login(request):
-#     """
-#     简化版登录接口（仅用于开发测试）
-#     请求示例：
-#     POST /login/
-#     {
-#         "username": "test",
-#         "password": "123456"
-#     }
-#     """
-#     serializer = LoginSerializer(data=request.data)
-    
-#     if serializer.is_valid():
-#         # 获取用户对象
-#         user = User.objects.get(username=serializer.validated_data['username'])
-        
-#         return Response({
-#             "status": "success",
-#             "user_info": {
-#                 "id": user.id,
-#                 "username": user.username,
-#                 "role": user.role
-#             }
-#         }, status=status.HTTP_200_OK)
-    
-#     print(serializer.errors)
-#     return Response({
-#         "status": "error",
-#         "errors": serializer.errors
-#     }, status=status.HTTP_400_BAD_REQUEST)
-
-# views.py
 @api_view(['POST'])
 def login(request):
     serializer = LoginSerializer(data=request.data)
@@ -81,3 +48,42 @@ def login(request):
             "role": user.role
         }
     }, status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+def register(request):
+    """
+    处理用户注册请求（使用序列化器）
+    """
+    serializer = RegisterSerializer(data=request.data)
+    
+    if not serializer.is_valid():
+        # 返回第一个验证错误信息
+        error_msg = next(iter(serializer.errors.values()))[0]
+        return Response({
+            'status': 'error',
+            'message': error_msg
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+    try:
+        # 创建用户
+        user = serializer.save()
+        
+        # 返回成功响应
+        return Response({
+            'status': 'success',
+            'message': '注册成功',
+            'user_id': user.id,
+            'username': user.username,
+            'role': user.role
+        }, status=status.HTTP_201_CREATED)
+        
+    except Exception as e:
+        # 记录异常信息
+        import logging
+        logging.error(f"用户注册异常: {str(e)}", exc_info=True)
+        
+        # 返回错误响应
+        return Response({
+            'status': 'error',
+            'message': f'注册失败: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

@@ -29,5 +29,5 @@ from backwards_testproj import settings
 # 主路由
 urlpatterns = [
     path("admin/", admin.site.urls), # django自带的后台管理页面
-    path("login/", include("backends_proj.urls")), # 自己实现的登录页面（前端和后端）
+    path("", include("backends_proj.urls")), # 自己实现的登录页面（前端和后端）
 ] # + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) # 静态文件路径 include("backends_proj.urls")

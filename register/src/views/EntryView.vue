@@ -38,14 +38,20 @@
 
 <script setup>
 import TopBar from '@/components/TopBar.vue'  // ✅ 引入组件
+import { useUserStore } from '@/stores/userStore'
 import { useRouter } from 'vue-router'
-//import medicalSymbol from '../assets/medical-symbol.png'
 import hospitalImage from '../assets/hospital-building.png'
+import { onMounted } from 'vue'
 const router = useRouter()
+const userStore = useUserStore()
 
+// ✅ 每次进入 Entry 页面自动清空登录状态
+onMounted(() => {
+    userStore.logout()
+})
 const goLogin = () => router.push('/login')
 const goDoctor = () => router.push({ path: '/login', query: { role: 'doctor' } })
-const goAdmin = () => router.push({ path: '/login', query: { role: 'admin' } })
+const goAdmin = () => router.push({ path: '/login', query: { role: 'administrator' } })
 const goRegister = () => router.push('/register-user')
 </script>
 
