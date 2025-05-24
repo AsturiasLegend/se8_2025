@@ -41,7 +41,7 @@ const patients = ref([
   { id: 2, name: '李四', gender: '女', age: 28, symptom: '头痛', time: '2025-04-18 上午 10:00 - 11:00' },
   { id: 3, name: '王五', gender: '男', age: 45, symptom: '腹痛', time: '2025-04-18 下午 2:00 - 3:00' }
 
-])
+]) 
 
 const selectedPatient = ref(null)
 

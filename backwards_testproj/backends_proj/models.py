@@ -1,3 +1,4 @@
+import uuid
 from django.db import models
 from django.contrib.auth.hashers import make_password, check_password
 from django.conf import settings
@@ -101,3 +102,74 @@ class PatientInfo(models.Model): # 只是PatientInfo的模型概念的定义，�
     @property
     def id_card(self):
         return self.user.id_card
+    
+class AppointmentSlot(models.Model):
+    # 号源模型
+    doctor = models.ForeignKey(
+        User,  # 关联到医生用户
+        on_delete=models.CASCADE,
+        related_name='doctor_slots',
+        verbose_name='医生',
+        limit_choices_to={'role': 'doctor'}  # 限制只能关联角色为医生的用户
+    )
+    time_slot = models.DateTimeField('时间段')  # 具体日期和时间段（如 2023-10-01 09:00-11:00）
+    total_quota = models.PositiveIntegerField('总号量', default=20)
+    remaining_quota = models.PositiveIntegerField('剩余号量', default=20)
+
+    class Meta:
+        verbose_name = '号源'
+        verbose_name_plural = '号源'
+        db_table = 'appointment_slot'
+
+    def __str__(self):
+        return f"{self.doctor.real_name} - {self.time_slot.strftime('%Y-%m-%d %H:%M')}"
+
+
+class RegistrationOrder(models.Model):
+    # 挂号单模型
+    STATUS_CHOICES = [
+        ('pending', '待就诊'),
+        ('completed', '已完成'),
+        ('canceled', '已取消'),
+    ]
+
+    order_id = models.UUIDField('挂号单号', primary_key=True, default=uuid.uuid4, editable=False)  # 唯一标识
+    patient = models.ForeignKey(
+        User,  # 关联到患者用户
+        on_delete=models.CASCADE,
+        related_name='patient_orders',
+        verbose_name='患者',
+        limit_choices_to={'role': 'patient'}  # 限制只能关联角色为患者的用户
+    )
+    slot = models.ForeignKey(
+        AppointmentSlot,
+        on_delete=models.CASCADE,
+        related_name='slot_orders',
+        verbose_name='号源'
+    )
+    status = models.CharField('状态', max_length=10, choices=STATUS_CHOICES, default='pending')
+    timestamp = models.DateTimeField('创建时间', auto_now_add=True)
+
+    class Meta:
+        verbose_name = '挂号单'
+        verbose_name_plural = '挂号单'
+        db_table = 'registration_order'
+
+    def __str__(self):
+        return f"挂号单 {self.order_id} - {self.patient.real_name}"
+
+    def save(self, *args, **kwargs):
+        """重写 save 方法，处理剩余号量逻辑"""
+        if not self.pk:  # 仅在创建时减少剩余号量
+            if self.slot.remaining_quota <= 0:
+                raise ValueError("号源已约满")
+            self.slot.remaining_quota -= 1
+            self.slot.save()
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        """删除时恢复剩余号量"""
+        if self.status == 'pending':  # 仅处理未完成的订单
+            self.slot.remaining_quota += 1
+            self.slot.save()
+        super().delete(*args, **kwargs)
