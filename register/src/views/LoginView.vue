@@ -55,7 +55,8 @@ const handleLogin = async () => {
    try {
      const res = await axios.post('http://localhost:8000/login/', {
        username: username.value,
-       password: password.value
+       password: password.value,
+       role: role
      })
 
      if (res.data.status === 'success') {

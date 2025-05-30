@@ -30,11 +30,13 @@ class UserSerializer(serializers.ModelSerializer): # 注册的序列化器，需
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField()
+    role = serializers.CharField()
 
     def validate(self, data):
         # 手动验证逻辑（无需模型关联）
         username = data.get('username')
         password = data.get('password')
+        role = data.get('role')
         
         # 检查用户是否存在
         try:
@@ -45,6 +47,9 @@ class LoginSerializer(serializers.Serializer):
         # 简单密码比较（仅限测试环境）
         if user.password != password:
             raise serializers.ValidationError("密码错误")
+
+        if user.role != role:
+            raise serializers.ValidationError("用户角色不匹配")
             
         return data  # 返回验证通过的数据
 
