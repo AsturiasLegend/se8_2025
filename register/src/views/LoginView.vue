@@ -64,8 +64,11 @@ const handleLogin = async () => {
         userStore.setUser({
             username: username.value,
             role: role,
-            token: res.data.token || ''
+            token: res.data.token
         })
+        localStorage.setItem('user_id', res.data.user_info.id)
+        localStorage.setItem('role', res.data.user_info.role)
+
 
        ElMessage.success('登录成功')
         if (role === 'doctor')

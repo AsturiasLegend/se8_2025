@@ -10,44 +10,71 @@ from rest_framework import status
 from backends_proj.serializers import *
 from backends_proj.models import *
 from rest_framework.exceptions import ValidationError
+from django.contrib.auth import login as auth_login
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny
 
 @api_view(['POST'])
 def login(request):
     serializer = LoginSerializer(data=request.data)
-    
+
     if not serializer.is_valid():
         return Response({
             "status": "error",
-            "message": "用户名或密码错误"  # 统一错误提示
+            "message": serializer.errors
         }, status=status.HTTP_400_BAD_REQUEST)
-    
-    try:
-        user = User.objects.get(username=serializer.validated_data['username'])
-        # 检查密码是否匹配
-        if not user.check_password(serializer.validated_data['password']):
-            raise ValidationError("密码错误")
-            
-    except User.DoesNotExist:
-        return Response({
-            "status": "error",
-            "message": "用户不存在"
-        }, status=status.HTTP_400_BAD_REQUEST)
-    
-    except ValidationError as e:
-        return Response({
-            "status": "error",
-            "message": str(e)
-        }, status=status.HTTP_400_BAD_REQUEST)
-    
-    # 登录成功逻辑
+
+    user = serializer.user  # ✅ 拿到验证通过的 user 实例
+
     return Response({
         "status": "success",
         "user_info": {
             "id": user.id,
             "username": user.username,
             "role": user.role
-        }
-    }, status=status.HTTP_200_OK)
+        },
+    })
+
+# @api_view(['POST'])
+# def login(request):
+#     serializer = LoginSerializer(data=request.data)
+    
+#     if not serializer.is_valid():
+#         return Response({
+#             "status": "error",
+#             "message": "用户名或密码错误"  # 统一错误提示
+#         }, status=status.HTTP_400_BAD_REQUEST)
+    
+#     try:
+#         user = User.objects.get(username=serializer.validated_data['username'])
+#         # 检查密码是否匹配
+#         if not user.check_password(serializer.validated_data['password']):
+#             raise ValidationError("密码错误")
+            
+#     except User.DoesNotExist:
+#         return Response({
+#             "status": "error",
+#             "message": "用户不存在"
+#         }, status=status.HTTP_400_BAD_REQUEST)
+    
+#     except ValidationError as e:
+#         return Response({
+#             "status": "error",
+#             "message": str(e)
+#         }, status=status.HTTP_400_BAD_REQUEST)
+    
+#     # 登录成功逻辑
+#     return Response({
+#         "status": "success",
+#         "user_info": {
+#             "id": user.id,
+#             "username": user.username,
+#             "role": user.role
+#         }
+#     }, status=status.HTTP_200_OK)
 
 @api_view(['POST'])
 def register(request):

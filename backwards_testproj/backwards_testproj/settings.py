@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework", # drf，用于构建RESTful API
+    "rest_framework.authtoken",  # ✅ DRF 的 Token 认证模块
     "corsheaders", # 跨域请求模块
     "backends_proj", # 自定义的应用模块，我们的实现主要在该模块中进行，该值对应backends_proj.apps.py文件中name = "backends_proj"语句
 ]
@@ -152,3 +153,6 @@ CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_ALL_ORIGINS = True
 # 允许所有的请求头进行跨域访问
 CORS_ALLOW_HEADERS = "*"
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:8080",  # Vue 前端地址
+]

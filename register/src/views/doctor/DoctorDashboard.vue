@@ -1,105 +1,77 @@
 <template>
-  <div class="doctor-wrapper">
-    <TopBar title="医生工作台" />
+  <div class="dashboard-wrapper">
+    <TopBar title="医生功能菜单" />
 
-    <div class="content">
-      <h2>📋 我的挂号病人</h2>
-
-      <!-- ✅ 表格包裹容器，启用滚动 -->
-      <div class="table-wrapper">
-        <el-table
-          :data="patients"
-          border
-          style="width: 100%"
-          @selection-change="handleSelectionChange"
-        >
-          <el-table-column type="selection" width="55" />
-          <el-table-column prop="name" label="姓名" width="120" />
-          <el-table-column prop="gender" label="性别" width="80" />
-          <el-table-column prop="age" label="年龄" width="80" />
-          <el-table-column prop="symptom" label="病症描述" />
-          <el-table-column prop="time" label="挂号时间段" width="300" />
-        </el-table>
-      </div>
-
-      <!-- ✅ 操作按钮 -->
-      <div class="button-row">
-        <el-button type="primary" :disabled="!selectedPatient" @click="callPatient">叫号</el-button>
-        <el-button type="success" :disabled="!selectedPatient" @click="finishPatient">接诊完成</el-button>
+    <div class="main">
+      <h2 class="welcome">欢迎使用 XXX 医院线上挂号系统</h2>
+      <div class="card-container">
+        <div class="card" @click="goTo('/doctor/profile')">
+          🧑‍⚕️ 基本信息
+        </div>
+        <div class="card" @click="goTo('/doctor/appointmentsetting')">
+          📅 号源管理
+        </div>
+        <div class="card" @click="goTo('/doctor/diagnosislist')">
+          📋 接诊管理
+        </div>
+        <div class="card" @click="goTo('/doctor/help')">
+          💡 系统帮助
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
 import TopBar from '@/components/TopBar.vue'
-import { ElMessage } from 'element-plus'
+import { useRouter } from 'vue-router'
+const router = useRouter()
 
-const patients = ref([
-  { id: 1, name: '张三', gender: '男', age: 32, symptom: '发烧、咳嗽', time: '2025-04-18 上午 9:00 - 10:00' },
-  { id: 2, name: '李四', gender: '女', age: 28, symptom: '头痛', time: '2025-04-18 上午 10:00 - 11:00' },
-  { id: 3, name: '王五', gender: '男', age: 45, symptom: '腹痛', time: '2025-04-18 下午 2:00 - 3:00' }
-
-]) 
-
-const selectedPatient = ref(null)
-
-const handleSelectionChange = (selection) => {
-  selectedPatient.value = selection[0] || null
-}
-
-const callPatient = () => {
-  if (selectedPatient.value) {
-    ElMessage.info(`🔔 请 ${selectedPatient.value.name} 到诊室就诊`)
-  }
-}
-
-const finishPatient = () => {
-  if (selectedPatient.value) {
-    ElMessage.success(`✅ 已完成 ${selectedPatient.value.name} 的接诊`)
-    patients.value = patients.value.filter(p => p.id !== selectedPatient.value.id)
-    selectedPatient.value = null
-  }
+const goTo = (path) => {
+  router.push(path)
 }
 </script>
 
 <style scoped>
-.doctor-wrapper {
-  font-family: Arial, sans-serif;
+.dashboard-wrapper {
+  font-family: sans-serif;
 }
-.content {
-  padding: 40px;
+
+.main {
   padding-top: 200px;
+  text-align: center;
+}
+
+.welcome {
+  font-size: 24px;
+  margin-bottom: 40px;
+}
+
+.card-container {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-h2 {
-  margin-bottom: 20px;
-}
-
-/* ✅ 滚动表格容器 */
-.table-wrapper {
-  max-height: 400px;
-  overflow-y: auto;
-  width: 100%;
-  max-width: 1000px;
-  margin: 0 auto;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
-
-/* ✅ 表格样式 */
-.el-table {
-  width: 100%;
-}
-
-/* ✅ 中间对齐按钮 */
-.button-row {
-  margin-top: 24px;
-  display: flex;
-  gap: 20px;
   justify-content: center;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+
+.card {
+  width: 160px;
+  height: 120px;
+  background: #ffffff;
+  border: 2px solid #0056ba;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  font-size: 18px;
+  color: #0056ba;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.card:hover {
+  background-color: #0056ba;
+  color: white;
 }
 </style>

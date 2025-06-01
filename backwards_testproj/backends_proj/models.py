@@ -112,7 +112,8 @@ class AppointmentSlot(models.Model):
         verbose_name='医生',
         limit_choices_to={'role': 'doctor'}  # 限制只能关联角色为医生的用户
     )
-    time_slot = models.DateTimeField('时间段')  # 具体日期和时间段（如 2023-10-01 09:00-11:00）
+    time_start = models.DateTimeField('起始时间')  
+    time_end = models.DateTimeField('结束时间')
     total_quota = models.PositiveIntegerField('总号量', default=20)
     remaining_quota = models.PositiveIntegerField('剩余号量', default=20)
 
@@ -122,7 +123,8 @@ class AppointmentSlot(models.Model):
         db_table = 'appointment_slot'
 
     def __str__(self):
-        return f"{self.doctor.real_name} - {self.time_slot.strftime('%Y-%m-%d %H:%M')}"
+        return f"{self.doctor.real_name} - {self.time_start.strftime('%Y-%m-%d %H:%M')} 至 {self.time_end.strftime('%Y-%m-%d %H:%M')} ({self.remaining_quota}/{self.total_quota})"
+
 
 
 class RegistrationOrder(models.Model):
@@ -131,9 +133,10 @@ class RegistrationOrder(models.Model):
         ('pending', '待就诊'),
         ('completed', '已完成'),
         ('canceled', '已取消'),
+        ('diagnosing', '正在就诊')
     ]
 
-    order_id = models.UUIDField('挂号单号', primary_key=True, default=uuid.uuid4, editable=False)  # 唯一标识
+    order_id = models.BigAutoField('挂号单号', primary_key=True)  # 唯一标识
     patient = models.ForeignKey(
         User,  # 关联到患者用户
         on_delete=models.CASCADE,
@@ -173,3 +176,27 @@ class RegistrationOrder(models.Model):
             self.slot.remaining_quota += 1
             self.slot.save()
         super().delete(*args, **kwargs)
+
+class DoctorProfile(models.Model):
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='doctor_profile',
+        verbose_name='医生',
+        limit_choices_to={'role': 'doctor'}  # 只关联医生角色
+    )
+    biography = models.TextField(
+        '医生简介',
+        max_length=2000,
+        blank=True,
+        null=True,
+        help_text='医生的专业背景、擅长领域等介绍'
+    )
+    
+    class Meta:
+        verbose_name = '医生简介'
+        verbose_name_plural = '医生简介'
+        db_table = 'doctor_profile'
+    
+    def __str__(self):
+        return f"{self.user.real_name}的简介"

@@ -24,46 +24,60 @@
         <button class="register-btn" @click="goRegister">去挂号</button>
       </div>
     </div>
+
+    <!-- 悬浮“系统帮助”按钮 -->
+    <button class="help-btn" @click="goHelp">❓系统帮助</button>
   </div>
 </template>
 
 <script setup>
 import TopBar from '@/components/TopBar.vue'
 import { useRouter } from 'vue-router'
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import axios from 'axios'
 
 const router = useRouter()
-
-// 模拟挂号记录（后续可从后端获取）
-const records = ref([
-  {
-    department: '内科',
-    doctor: '张医生',
-    timeSlot: '上午',
-    date: '2025-04-18'
-  },
-  {
-    department: '儿科',
-    doctor: '李医生',
-    timeSlot: '下午',
-    date: '2025-04-19'
-  }
-])
+const records = ref([])
 
 const goRegister = () => {
-  router.push('/register')
+  router.push('/patient/register')
 }
+
+const goHelp = () => {
+  router.push('/patient/help')
+}
+
+// ✅ 获取真实挂号记录（替换为后端接口）
+onMounted(async () => {
+  try {
+    const userId = localStorage.getItem('user_id')
+    const role = localStorage.getItem('role')
+    const res = await axios.get('http://localhost:8000/patient/records/', {
+                    params: {
+                          user_id: userId,
+                          role: role
+                      }
+})
+
+    if (res.data.code === 200) {
+      records.value = res.data.data || []
+    }
+  } catch (err) {
+    console.error('获取挂号记录失败', err)
+  }
+})
 </script>
 
 <style scoped>
 .dashboard-wrapper {
   font-family: Arial, sans-serif;
 }
+
 .content {
   padding: 40px;
   margin-top: 160px; /* 确保内容和顶栏分开 */
 }
-/* ✅ 新增大卡片区域 */
+
 .record-box {
   border: 2px solid #0056ba;
   border-radius: 12px;
@@ -73,8 +87,8 @@ const goRegister = () => {
   max-width: 600px;
   margin-left: auto;
   margin-right: auto;
-  height: 500px; /* 设置固定高度以启用滚动 */
-  overflow-y: auto; /* 当内容超出时可滚动 */
+  height: 500px;
+  overflow-y: auto;
 }
 
 .record-box h3 {
@@ -101,7 +115,6 @@ const goRegister = () => {
   padding: 12px;
 }
 
-/* ✅ 居中按钮容器 */
 .btn-container {
   display: flex;
   justify-content: center;
@@ -119,5 +132,24 @@ const goRegister = () => {
 }
 .register-btn:hover {
   background-color: #0056ba;
+}
+
+/* ✅ 悬浮帮助按钮 */
+.help-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  padding: 12px 18px;
+  font-size: 14px;
+  border-radius: 50px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  z-index: 1000;
+}
+.help-btn:hover {
+  background-color: #495057;
 }
 </style>

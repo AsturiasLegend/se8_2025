@@ -50,6 +50,8 @@ class LoginSerializer(serializers.Serializer):
 
         if user.role != role:
             raise serializers.ValidationError("用户角色不匹配")
+        
+        self.user = user
             
         return data  # 返回验证通过的数据
 
