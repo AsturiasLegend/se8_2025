@@ -4,6 +4,7 @@
       🏥 XXX医院线上挂号系统
     </div>
     <div class="user-section" v-if="userStore.role">
+      <button class="info-btn" @click="goProfile">基本信息</button>
       <span class="user-info">👤 {{ userStore.username }}</span>
       <button class="logout-btn" @click="logout">退出</button>
     </div>
@@ -22,6 +23,14 @@ const logout = () => {
   userStore.logout()
   ElMessage.success('退出成功')
   router.push('/entry')
+}
+
+const goProfile = () => {
+  if (userStore.role === 'doctor') {
+    router.push('/doctor/profile')
+  } else if (userStore.role === 'patient') {
+    router.push('/patient/profile')
+  }
 }
 </script>
 
@@ -49,12 +58,24 @@ const logout = () => {
   gap: 8px;
 }
 
-/* 新增用户信息区域样式 */
 .user-section {
   display: flex;
   align-items: center;
   gap: 16px;
   font-size: 18px;
+}
+
+.info-btn {
+  background: white;
+  color: #0056ba;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+}
+.info-btn:hover {
+  background: #f5f5f5;
 }
 
 .logout-btn {

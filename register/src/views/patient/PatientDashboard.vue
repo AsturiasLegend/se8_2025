@@ -4,7 +4,6 @@
 
     <div class="btn-container">
       <button class="register-btn" @click="goRegister">去挂号</button>
-      <button class="profile-btn" @click="goProfile">基本信息</button> <!-- 新增按钮 -->
     </div>
 
 
@@ -15,6 +14,7 @@
         <div v-if="records.length > 0" class="record-list">
           <div v-for="(record, index) in records" :key="index" class="record-item">
             <p>医生：{{ record.doctor_name }}</p>
+            <p>科室：{{ record.department}}</p>
             <p>时间：{{ record.appointment_time }} - {{ record.appointment_end_time }}</p>
             <p>状态：{{ record.status_display }}</p>
             <p>挂号时间：{{ record.timestamp }}</p>
@@ -88,10 +88,6 @@ const goRegister = () => {
 
 const goHelp = () => {
   router.push('/patient/help')
-}
-
-const goProfile = () => {
-  router.push('/patient/profile')
 }
 
 onMounted(fetchRecords)
@@ -188,20 +184,5 @@ onMounted(fetchRecords)
 }
 .help-btn:hover {
   background-color: #495057;
-}
-
-.profile-btn {
-  padding: 12px 24px;
-  background-color: #28a745;
-  border: none;
-  color: white;
-  font-size: 16px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.3s;
-  margin-left: 20px; /* 与前一按钮留间距 */
-}
-.profile-btn:hover {
-  background-color: #1e7e34;
 }
 </style>

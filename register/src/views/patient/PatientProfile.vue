@@ -5,10 +5,12 @@
     <div class="profile-card">
       <h2>🧾 患者信息</h2>
       <div v-if="info">
+        <p><strong>账号：</strong>{{ info.username }}</p>
         <p><strong>姓名：</strong>{{ info.real_name }}</p>
+        <p><strong>性别：</strong>{{ info.gender }}</p>
         <p><strong>身份证号：</strong>{{ info.id_card }}</p>
         <p><strong>手机号：</strong>{{ info.phone }}</p>
-        <p><strong>账号：</strong>{{ info.username }}</p>
+        <p><strong>状态：</strong>{{ info.account_state }}</p>
       </div>
       <div v-else>
         <p>正在加载信息...</p>

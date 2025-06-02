@@ -1,7 +1,7 @@
 # backends_proj/views/patients.py
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
-from backends_proj.models import RegistrationOrder, User, AppointmentSlot, DoctorProfile
+from backends_proj.models import RegistrationOrder, User, AppointmentSlot, DoctorProfile, PatientInfo
 from datetime import datetime, date
 from django.utils import timezone
 from rest_framework.response import Response
@@ -370,9 +370,19 @@ def get_patient_orders(request):
             can_cancel = (order.status == 'pending' and 
                          order.slot.time_start > timezone.now())
             
+            # 根据 doctor_id 从 DoctorProfile 表中获取科室名称
+            try:
+                doctor_profile = DoctorProfile.objects.get(user=order.slot.doctor)
+                print(f"{doctor_profile}")
+                department = doctor_profile.department
+            except DoctorProfile.DoesNotExist:
+                department = '未知科室'
+            print(f"科室名称: {department}")
+
             order_data = {
                 'order_id': order.order_id,
                 'slot_id': order.slot.id,
+                'department': department,
                 'doctor_name': order.slot.doctor.real_name,
                 'doctor_id': order.slot.doctor.id,
                 'appointment_time': order.slot.time_start.strftime('%Y-%m-%d %H:%M'),
@@ -538,5 +548,82 @@ def get_order_detail(request):
         
     except Exception as e:
         print("查询挂号详情发生异常：", str(e))
+        traceback.print_exc()
+        return JsonResponse({'code': 500, 'message': f'服务器错误: {str(e)}'}, status=500)
+    
+# 功能3：获取患者个人信息
+@api_view(['GET'])
+def get_patient_profile(request):
+    """获取患者的基本信息"""
+    try:
+        user_id = request.GET.get('user_id')
+        role = request.GET.get('role')
+        
+        print(f"查询患者信息 - user_id: {user_id}, role: {role}")
+        
+        # 基础校验
+        if not user_id or role != 'patient':
+            return JsonResponse({'code': 403, 'message': '仅患者可查看个人信息'}, status=403)
+        
+        # 获取患者对象
+        try:
+            patient = User.objects.get(id=user_id, role='patient', is_active=True)
+            print(f"找到患者: {patient.real_name}, ID: {patient.id}")
+        except User.DoesNotExist:
+            return JsonResponse({'code': 404, 'message': '患者用户不存在或已停用'}, status=404)
+        
+        # 尝试获取患者扩展信息
+        patient_info = None
+        try:
+            patient_info = PatientInfo.objects.get(user=patient)
+            print(f"找到患者扩展信息: {patient_info}")
+        except PatientInfo.DoesNotExist:
+            print(f"患者 {patient.real_name} 没有扩展信息")
+        
+        account_state = '正常' if patient.is_active else '停用'
+
+        # 构造返回数据
+        profile_data = {
+            'user_id': patient.id,
+            'username': patient.username,
+            'real_name': patient.real_name,
+            'phone': patient.phone,
+            'id_card': patient.id_card or '',
+            'age': patient.age,
+            'gender': patient.get_gender_display(),  # 获取性别的显示名称
+            'gender_code': patient.gender,  # 性别代码
+            'role': patient.role,
+            'account_state': account_state,
+        }
+        
+        # 如果有扩展信息，添加到返回数据中
+        if patient_info:
+            profile_data.update({
+                'message': patient_info.message or '',
+                'medical_history': patient_info.medical_history or '',
+                'allergies': patient_info.allergies or '',
+                'emergency_contact': patient_info.emergency_contact or '',
+                'emergency_phone': patient_info.emergency_phone or ''
+            })
+        else:
+            # 如果没有扩展信息，设置默认值
+            profile_data.update({
+                'message': '',
+                'medical_history': '',
+                'allergies': '',
+                'emergency_contact': '',
+                'emergency_phone': ''
+            })
+        
+        print(f"返回的患者信息: {profile_data}")
+        
+        return JsonResponse({
+            'code': 200,
+            'message': '成功获取患者信息',
+            'data': profile_data
+        })
+        
+    except Exception as e:
+        print("查询患者信息发生异常：", str(e))
         traceback.print_exc()
         return JsonResponse({'code': 500, 'message': f'服务器错误: {str(e)}'}, status=500)
