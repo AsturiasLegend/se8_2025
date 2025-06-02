@@ -17,6 +17,7 @@ urlpatterns = [path('login/', views.users.login),
                path('patient/orders/', views.patients.get_patient_orders, name='get_patient_orders'),
                path('patient/register/', views.patients.create_registration, name='patient_register'),
                path('patient/records/', views.patients.get_patient_orders, name='patient_records'),
-                path('patient/cancel-registration/', views.patients.cancel_registration, name='cancel_registration'),
+                path('patient/cancel/', views.patients.cancel_registration, name='cancel_registration'),
                 path('patient/order-detail/', views.patients.get_order_detail, name='get_order_detail'),
+                path('patient/profile/', views.patients.get_patient_profile, name='get_patient_profile'),
                ] # 需要填充路由接口，注意方法的名称本身组成路径的一部分

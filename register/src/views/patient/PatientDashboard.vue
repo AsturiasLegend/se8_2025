@@ -9,6 +9,7 @@
         <div v-if="records.length > 0" class="record-list">
           <div v-for="(record, index) in records" :key="index" class="record-item">
             <p>医生：{{ record.doctor_name }}</p>
+            <p>科室：{{ record.department}}</p>
             <p>时间：{{ record.appointment_time }} - {{ record.appointment_end_time }}</p>
             <p>状态：{{ record.status_display }}</p>
             <p>挂号时间：{{ record.timestamp }}</p>
