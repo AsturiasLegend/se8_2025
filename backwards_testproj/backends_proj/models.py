@@ -24,7 +24,7 @@ class User(models.Model):
     password = models.CharField('password', max_length=128)
     real_name = models.CharField('realname', max_length=30)
     phone = models.CharField('phonenumber', max_length=20, unique=True)
-    role = models.CharField('role', max_length=10, choices=ROLE_CHOICES)
+    role = models.CharField('role', max_length=20, choices=ROLE_CHOICES)
     id_card = models.CharField('idcard', max_length=18, unique=True, blank=True, null=True)
     
     # 状态字段
