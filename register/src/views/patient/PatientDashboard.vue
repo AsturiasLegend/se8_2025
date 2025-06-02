@@ -8,10 +8,12 @@
 
         <div v-if="records.length > 0" class="record-list">
           <div v-for="(record, index) in records" :key="index" class="record-item">
-            <p>科室：{{ record.department }}</p>
-            <p>医生：{{ record.doctor }}</p>
-            <p>时间段：{{ record.timeSlot }}</p>
-            <p>日期：{{ record.date }}</p>
+            <p>医生：{{ record.doctor_name }}</p>
+            <p>时间：{{ record.appointment_time }} - {{ record.appointment_end_time }}</p>
+            <p>状态：{{ record.status_display }}</p>
+            <p>挂号时间：{{ record.timestamp }}</p>
+
+            <button v-if="record.can_cancel" class="cancel-btn" @click="cancelRecord(record.order_id)">取消挂号</button>
           </div>
         </div>
         <div v-else class="no-records">
@@ -19,7 +21,6 @@
         </div>
       </div>
 
-      <!-- 去挂号按钮 -->
       <div class="btn-container">
         <button class="register-btn" @click="goRegister">去挂号</button>
       </div>
@@ -35,9 +36,45 @@ import TopBar from '@/components/TopBar.vue'
 import { useRouter } from 'vue-router'
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
+import { ElMessage } from 'element-plus'
 
 const router = useRouter()
 const records = ref([])
+
+const fetchRecords = async () => {
+  try {
+    const userId = localStorage.getItem('user_id')
+    const role = localStorage.getItem('role')
+    const res = await axios.get('http://localhost:8000/patient/records/', {
+      params: { user_id: userId, role }
+    })
+
+    if (res.data.code === 200) {
+      records.value = res.data.data || []
+    }
+  } catch (err) {
+    console.error('获取挂号记录失败', err)
+  }
+}
+
+const cancelRecord = async (orderId) => {
+  try {
+    const res = await axios.post('http://localhost:8000/patient/cancel/', {
+      user_id: localStorage.getItem('user_id'),
+      role: localStorage.getItem('role'),
+      order_id: orderId
+    })
+
+    if (res.data.code === 200) {
+      ElMessage.success('挂号取消成功')
+      await fetchRecords()
+    } else {
+      ElMessage.error(res.data.message || '取消失败')
+    }
+  } catch (err) {
+    ElMessage.error('服务器连接失败')
+  }
+}
 
 const goRegister = () => {
   router.push('/patient/register')
@@ -47,25 +84,7 @@ const goHelp = () => {
   router.push('/patient/help')
 }
 
-// ✅ 获取真实挂号记录（替换为后端接口）
-onMounted(async () => {
-  try {
-    const userId = localStorage.getItem('user_id')
-    const role = localStorage.getItem('role')
-    const res = await axios.get('http://localhost:8000/patient/records/', {
-                    params: {
-                          user_id: userId,
-                          role: role
-                      }
-})
-
-    if (res.data.code === 200) {
-      records.value = res.data.data || []
-    }
-  } catch (err) {
-    console.error('获取挂号记录失败', err)
-  }
-})
+onMounted(fetchRecords)
 </script>
 
 <style scoped>
@@ -75,7 +94,7 @@ onMounted(async () => {
 
 .content {
   padding: 40px;
-  margin-top: 160px; /* 确保内容和顶栏分开 */
+  margin-top: 160px;
 }
 
 .record-box {
@@ -97,16 +116,25 @@ onMounted(async () => {
   color: #0056ba;
 }
 
-.record-list {
-  margin-bottom: 20px;
-}
-
 .record-item {
   border: 1px solid #ccc;
   border-radius: 8px;
   padding: 16px;
   margin-bottom: 12px;
   background-color: #ffffff;
+}
+
+.cancel-btn {
+  margin-top: 10px;
+  padding: 8px 16px;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.cancel-btn:hover {
+  background-color: #c82333;
 }
 
 .no-records {
@@ -134,7 +162,6 @@ onMounted(async () => {
   background-color: #0056ba;
 }
 
-/* ✅ 悬浮帮助按钮 */
 .help-btn {
   position: fixed;
   bottom: 24px;
