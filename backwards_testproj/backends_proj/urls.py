@@ -9,4 +9,14 @@ urlpatterns = [path('login/', views.users.login),
                path('doctor/profile/update', views.doctors.update_doctor_profile),  # 更新简介
                path('doctor/profile/', views.doctors.get_doctor_profile),      # 查看简介
 
+               # 患者相关API
+               path('patient/get_doctors/', views.patients.get_doctors_by_department, name='get_doctors_by_department'),   # 获取医生列表
+               path('patient/get_slots/', views.patients.get_slots_by_doctor_and_date, name='get_slots_by_doctor_and_date'),   # 获取医生的号源
+               path('patient/create-registration/', views.patients.create_registration, name='create_registration'),   # 患者创建挂号
+               path('patient/available-slots/', views.patients.get_available_slots, name='get_available_slots'),   # 获取可预约时间段
+               path('patient/orders/', views.patients.get_patient_orders, name='get_patient_orders'),
+               path('patient/register/', views.patients.create_registration, name='patient_register'),
+               path('patient/records/', views.patients.get_patient_orders, name='patient_records'),
+                path('patient/cancel-registration/', views.patients.cancel_registration, name='cancel_registration'),
+                path('patient/order-detail/', views.patients.get_order_detail, name='get_order_detail'),
                ] # 需要填充路由接口，注意方法的名称本身组成路径的一部分
