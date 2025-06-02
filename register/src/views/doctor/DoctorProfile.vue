@@ -15,6 +15,11 @@
         <span>{{ userStore.role }}</span>
       </div>
 
+      <div class="info-row">
+        <label>科室：</label>
+        <span>{{ department }}</span>
+      </div>
+
       <div class="info-row bio-row">
         <label>简介：</label>
         <el-input
@@ -39,8 +44,9 @@ import { useUserStore } from '@/stores/userStore'
 
 const userStore = useUserStore()
 const biography = ref('')
+const department = ref('')
 
-// 加载简介信息
+// 加载医生简介和科室信息
 const loadProfile = async () => {
   try {
     const res = await axios.get('http://localhost:8000/doctor/profile/', {
@@ -51,6 +57,7 @@ const loadProfile = async () => {
     })
     if (res.data.code === 200) {
       biography.value = res.data.data.biography
+      department.value = res.data.data.department || '暂无信息'
     } else {
       ElMessage.error(res.data.message || '加载失败')
     }
@@ -59,7 +66,7 @@ const loadProfile = async () => {
   }
 }
 
-// 提交保存
+// 提交简介保存
 const saveProfile = async () => {
   try {
     const res = await axios.post('http://localhost:8000/doctor/profile/update', {

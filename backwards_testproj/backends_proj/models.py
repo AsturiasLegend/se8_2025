@@ -192,6 +192,13 @@ class DoctorProfile(models.Model):
         null=True,
         help_text='医生的专业背景、擅长领域等介绍'
     )
+    department = models.CharField(
+        '科室',
+        max_length=100,
+        blank=True,
+        null=True,
+        help_text='医生所属科室'
+    )
     
     class Meta:
         verbose_name = '医生简介'

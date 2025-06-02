@@ -186,7 +186,8 @@ def get_doctor_profile(request):
             "code": 200,
             "message": "成功获取医生简介",
             "data": {
-                "biography": profile.biography or ""
+                "biography": profile.biography or "",
+                "department": profile.department or ""
             }
         })
 
