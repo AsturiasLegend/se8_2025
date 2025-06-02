@@ -55,7 +55,7 @@ router.beforeEach((to, from, next) => {
   const rolePrefixMap = {
     patient: '/patient/',
     doctor: '/doctor/',
-    admin: '/administrator/'
+    administrator: '/administrator/'
   }
 
   const path = to.path

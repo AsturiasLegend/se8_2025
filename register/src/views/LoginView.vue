@@ -73,7 +73,7 @@ const handleLogin = async () => {
        ElMessage.success('登录成功')
         if (role === 'doctor')
            router.push('/doctor/dashboard')
-        else if (role === 'admin')
+        else if (role === 'administrator')
            router.push('/administrator/dashboard')
         else
            router.push('/patient/dashboard')
