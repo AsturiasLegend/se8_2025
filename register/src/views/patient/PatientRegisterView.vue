@@ -16,24 +16,36 @@
           </label>
 
           <label>*选择科室：
-            <el-select v-model="department" placeholder="请选择科室">
-              <el-option label="内科" value="内科" />
-              <el-option label="外科" value="外科" />
-              <el-option label="儿科" value="儿科" />
+            <el-select v-model="department" placeholder="请选择科室" @change="fetchDoctors">
+              <el-option v-for="dept in departments" :key="dept" :label="dept" :value="dept" />
             </el-select>
           </label>
 
           <label>*选择医生：
-            <el-select v-model="doctor" placeholder="请选择医生">
-              <el-option label="张医生" value="张医生" />
-              <el-option label="李医生" value="李医生" />
+            <el-select v-model="doctor" placeholder="请选择医生" @change="fetchSlots">
+              <el-option v-for="doc in doctors" :key="doc.id" :label="doc.real_name" :value="doc.id" />
             </el-select>
           </label>
 
+          <label>*选择日期：
+            <el-date-picker
+              v-model="selectedDate"
+              type="date"
+              placeholder="选择日期"
+              size="large"
+              style="width: 300px"
+              @change="fetchSlots"
+            />
+          </label>
+
           <label>*选择时间段：
-            <el-select v-model="timeSlot" placeholder="请选择时间段">
-              <el-option label="上午 8:00-10:00" value="morning" />
-              <el-option label="下午 14:00-16:00" value="afternoon" />
+            <el-select v-model="selectedSlotId" placeholder="请选择时间段">
+              <el-option
+                v-for="slot in timeSlots"
+                :key="slot.slot_id"
+                :label="`${slot.start} - ${slot.end}`"
+                :value="slot.slot_id"
+              />
             </el-select>
           </label>
 
@@ -43,13 +55,6 @@
 
       <div class="calendar-section">
         <img class="calendar-demo-img" src="../../assets/calendar-example.png" alt="示例日历" />
-        <el-date-picker
-          v-model="selectedDate"
-          type="date"
-          placeholder="选择日期"
-          size="large"
-          style="width: 300px"
-        />
       </div>
     </div>
   </div>
@@ -61,18 +66,62 @@ import { ref } from 'vue'
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
 
-const selectedDate = ref('')
 const symptom = ref('')
 const description = ref('')
 const department = ref('')
 const doctor = ref('')
-const timeSlot = ref('')
+const selectedDate = ref('')
+const selectedSlotId = ref('')
+
+const departments = ['内科', '外科', '儿科', '眼科']
+const doctors = ref([])
+const timeSlots = ref([])
+
+const fetchDoctors = async () => {
+  doctor.value = ''
+  selectedSlotId.value = ''
+  timeSlots.value = []
+
+  try {
+    const res = await axios.get('http://localhost:8000/patient/get_doctors/', {
+      params: { department: department.value }
+    })
+    if (res.data.code === 200) {
+      doctors.value = res.data.data
+    } else {
+      ElMessage.error(res.data.message || '获取医生失败')
+    }
+  } catch {
+    ElMessage.error('服务器连接失败')
+  }
+}
+
+const fetchSlots = async () => {
+  if (!doctor.value || !selectedDate.value) return
+
+  try {
+    const res = await axios.get('http://localhost:8000/patient/get_slots/', {
+      params: {
+        doctor_id: doctor.value,
+        date: selectedDate.value
+      }
+    })
+    if (res.data.code === 200) {
+      // 假设返回为 [{ slot_id, start, end }]
+      timeSlots.value = res.data.data
+    } else {
+      ElMessage.error(res.data.message || '获取时间段失败')
+    }
+  } catch {
+    ElMessage.error('服务器连接失败')
+  }
+}
 
 const submitForm = async () => {
   const userId = localStorage.getItem('user_id')
   const role = localStorage.getItem('role')
 
-  if (!selectedDate.value || !department.value || !doctor.value || !timeSlot.value) {
+  if (!department.value || !doctor.value || !selectedDate.value || !selectedSlotId.value) {
     ElMessage.warning('请完整填写所有必填项')
     return
   }
@@ -84,9 +133,8 @@ const submitForm = async () => {
       symptom: symptom.value,
       description: description.value,
       department: department.value,
-      doctor: doctor.value,
-      time_slot: timeSlot.value,
-      date: selectedDate.value
+      doctor_id: doctor.value,
+      slot_id: selectedSlotId.value
     })
 
     if (res.data.code === 200) {
@@ -94,7 +142,7 @@ const submitForm = async () => {
     } else {
       ElMessage.error(res.data.message || '挂号失败')
     }
-  } catch (error) {
+  } catch {
     ElMessage.error('服务器连接失败')
   }
 }
