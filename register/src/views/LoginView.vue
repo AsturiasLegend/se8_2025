@@ -25,32 +25,17 @@
 <script setup>
 import { ref } from 'vue'
 import axios from 'axios'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import TopBar from '../components/TopBar.vue'
-import { useRoute } from 'vue-router'
 import { useUserStore } from '../stores/userStore'  // ✅ 路径根据实际位置调整
 const userStore = useUserStore()
-const route = useRoute()
-const role = route.query.role || 'patient'
 const router = useRouter()
+const route = useRoute()
 const username = ref('')
 const password = ref('')
+const role = route.query.role || 'patient'  // ✅ 角色参数从路由参数获取
 
-// const handleLogin = () => {
-//   userStore.setUser({
-//             username: '123',
-//             role: 'patient',
-//             token:  ''
-//         })
-//  if (role === 'doctor')
-//    router.push('/doctor/dashboard')
-//  else if (role === 'administrator')
-//    router.push('/administrator/dashboard')
-//  else
-//    router.push('/patient/dashboard')
-
-// }
 const handleLogin = async () => {
    try {
      const res = await axios.post('http://localhost:8000/login/', {
@@ -61,9 +46,10 @@ const handleLogin = async () => {
 
      if (res.data.status === 'success') {
         // ✅ 设置用户状态（可用于权限控制）
+        const userRole = res.data.user_info.role  // 这里改为使用后端返回的角色信息进行跳转
         userStore.setUser({
             username: username.value,
-            role: role,
+            role: userRole,
             token: res.data.token
         })
         localStorage.setItem('user_id', res.data.user_info.id)
@@ -71,9 +57,9 @@ const handleLogin = async () => {
 
 
        ElMessage.success('登录成功')
-        if (role === 'doctor')
+        if (res.data.user_info.role === 'doctor')
            router.push('/doctor/dashboard')
-        else if (role === 'administrator')
+        else if (userRole === 'administrator')
            router.push('/administrator/dashboard')
         else
            router.push('/patient/dashboard')
@@ -81,8 +67,6 @@ const handleLogin = async () => {
        ElMessage.error(res.data.message || '用户名或密码错误')
      }
    } catch (error) {
-//     console.error(error)
-//     ElMessage.error('无法连接服务器')
            if (error.response) {
       // 服务器返回了 4xx/5xx 响应
       const status = error.response.status;

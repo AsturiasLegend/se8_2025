@@ -30,6 +30,7 @@ upload/
 # === Vue.js/Node.js 相关 ===
 # 依赖包
 register/node_modules/
+.specstory
 register/npm-debug.log*
 register/yarn-debug.log*
 register/yarn-error.log*

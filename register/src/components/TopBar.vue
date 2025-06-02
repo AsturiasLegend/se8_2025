@@ -30,6 +30,8 @@ const goProfile = () => {
     router.push('/doctor/profile')
   } else if (userStore.role === 'patient') {
     router.push('/patient/profile')
+  } else if (userStore.role === 'administrator') {
+    router.push('/administrator/dashboard')
   }
 }
 </script>

@@ -92,6 +92,15 @@ def register(request):
         }, status=status.HTTP_400_BAD_REQUEST)
     
     try:
+        # 检查是否是管理员注册
+        if serializer.validated_data.get('role') == 'administrator':
+            admin_code = request.data.get('admin_code')
+            if not admin_code or admin_code != 'ADMIN2025':  # 设置一个固定的管理员注册码
+                return Response({
+                    'status': 'error',
+                    'message': '管理员注册需要提供正确的注册码'
+                }, status=status.HTTP_403_FORBIDDEN)
+        
         # 创建用户
         user = serializer.save()
         

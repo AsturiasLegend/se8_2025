@@ -207,3 +207,98 @@ class DoctorProfile(models.Model):
     
     def __str__(self):
         return f"{self.user.real_name}的简介"
+class Department(models.Model):
+    """科室模型"""
+    name = models.CharField('科室名称', max_length=50, unique=True)
+    description = models.TextField('科室描述', blank=True, null=True)
+    created_at = models.DateTimeField('创建时间', auto_now_add=True)
+
+    class Meta:
+        verbose_name = '科室'
+        verbose_name_plural = '科室'
+        db_table = 'department'
+
+    def __str__(self):
+        return self.name
+
+class DoctorDepartment(models.Model):
+    """医生-科室关联模型"""
+    doctor = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='doctor_departments',
+        verbose_name='医生',
+        limit_choices_to={'role': 'doctor'}
+    )
+    department = models.ForeignKey(
+        Department,
+        on_delete=models.CASCADE,
+        related_name='department_doctors',
+        verbose_name='科室'
+    )
+    is_primary = models.BooleanField('是否主科室', default=False)
+    created_at = models.DateTimeField('创建时间', auto_now_add=True)
+
+    class Meta:
+        verbose_name = '医生科室'
+        verbose_name_plural = '医生科室'
+        db_table = 'doctor_department'
+        unique_together = ('doctor', 'department')
+
+    def __str__(self):
+        return f"{self.doctor.real_name} - {self.department.name}"
+
+class DepartmentSchedule(models.Model):
+    """科室排班模型"""
+    department = models.ForeignKey(
+        Department,
+        on_delete=models.CASCADE,
+        related_name='department_schedules',
+        verbose_name='科室'
+    )
+    date = models.DateField('日期')
+    time_slot = models.TimeField('时间段')
+    total_quota = models.PositiveIntegerField('总号量', default=20)
+    remaining_quota = models.PositiveIntegerField('剩余号量', default=20)
+    is_active = models.BooleanField('是否启用', default=True)
+    created_at = models.DateTimeField('创建时间', auto_now_add=True)
+
+    class Meta:
+        verbose_name = '科室排班'
+        verbose_name_plural = '科室排班'
+        db_table = 'department_schedule'
+        unique_together = ('department', 'date', 'time_slot')
+
+    def __str__(self):
+        return f"{self.department.name} - {self.date} {self.time_slot}"
+
+class SystemMetrics(models.Model):
+    """系统指标模型"""
+    date = models.DateField('日期', unique=True)
+    total_appointments = models.PositiveIntegerField('总预约数', default=0)
+    completed_appointments = models.PositiveIntegerField('已完成预约数', default=0)
+    canceled_appointments = models.PositiveIntegerField('已取消预约数', default=0)
+    no_show_appointments = models.PositiveIntegerField('爽约数', default=0)
+    created_at = models.DateTimeField('创建时间', auto_now_add=True)
+
+    class Meta:
+        verbose_name = '系统指标'
+        verbose_name_plural = '系统指标'
+        db_table = 'system_metrics'
+
+    def __str__(self):
+        return f"系统指标 - {self.date}"
+
+    @property
+    def completion_rate(self):
+        """完成率"""
+        if self.total_appointments == 0:
+            return 0
+        return round(self.completed_appointments / self.total_appointments * 100, 2)
+
+    @property
+    def no_show_rate(self):
+        """爽约率"""
+        if self.total_appointments == 0:
+            return 0
+        return round(self.no_show_appointments / self.total_appointments * 100, 2)

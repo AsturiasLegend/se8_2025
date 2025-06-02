@@ -16,6 +16,9 @@ import DoctorProfile from '@/views/doctor/DoctorProfile.vue'
 import DoctorHelp from '@/views/doctor/DoctorHelp.vue'
 import PatientHelp from '@/views/patient/PatientHelp.vue'
 import PatientProfile from '@/views/patient/PatientProfile.vue'
+import DepartmentScheduleView from '@/views/admin/DepartmentScheduleView.vue'
+import SystemMonitorView from '@/views/admin/SystemMonitorView.vue'
+import DoctorApprovalView from '@/views/admin/DoctorApprovalView.vue'
 
 const routes = [
   { path: '/', redirect: '/entry' },
@@ -39,7 +42,10 @@ const routes = [
   { path: '/doctor/help', name: 'DoctorHelp', component: DoctorHelp},
 
   // 管理员页面
-  { path: '/administrator/dashboard', name: 'AdminDashboard', component: AdminDashboard }
+  { path: '/administrator/dashboard', name: 'AdminDashboard', component: AdminDashboard },
+  { path: '/administrator/schedule', name: 'DepartmentSchedule', component: DepartmentScheduleView },
+  { path: '/administrator/approval', name: 'DoctorApproval', component: DoctorApprovalView },
+  { path: '/administrator/monitor', name: 'SystemMonitor', component: SystemMonitorView }
 ]
 
 const router = createRouter({

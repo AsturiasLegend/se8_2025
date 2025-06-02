@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from backends_proj.models import User
+from backends_proj.models import User, Department, DoctorDepartment, DepartmentSchedule, SystemMetrics
 
 class UserSerializer(serializers.ModelSerializer): # 注册的序列化器，需要验证所有属性，实际上没有用到，注册功能的序列化器由RegisterSerializer类实现
     # 显示角色名称（替代原始值）
@@ -66,7 +66,7 @@ class RegisterSerializer(serializers.Serializer):
     gender = serializers.ChoiceField(choices=['M', 'F', 'O'])
     age = serializers.IntegerField(min_value=1, max_value=120)
     password = serializers.CharField(write_only=True, style={'input_type': 'password'})
-    role = serializers.ChoiceField(choices=['patient', 'doctor', 'admin'], default='patient')
+    role = serializers.ChoiceField(choices=['patient', 'doctor', 'administrator'], default='patient')
     
     def validate_username(self, value):
         """验证用户名是否唯一"""
@@ -107,3 +107,34 @@ class RegisterSerializer(serializers.Serializer):
         user.set_password(validated_data['password'])
         user.save()
         return user
+
+class DepartmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Department
+        fields = '__all__'
+
+class DoctorDepartmentSerializer(serializers.ModelSerializer):
+    doctor_name = serializers.CharField(source='doctor.real_name', read_only=True)
+    department_name = serializers.CharField(source='department.name', read_only=True)
+
+    class Meta:
+        model = DoctorDepartment
+        fields = ['id', 'doctor', 'doctor_name', 'department', 'department_name', 'is_primary', 'created_at']
+
+class DepartmentScheduleSerializer(serializers.ModelSerializer):
+    department_name = serializers.CharField(source='department.name', read_only=True)
+
+    class Meta:
+        model = DepartmentSchedule
+        fields = ['id', 'department', 'department_name', 'date', 'time_slot', 
+                 'total_quota', 'remaining_quota', 'is_active', 'created_at']
+
+class SystemMetricsSerializer(serializers.ModelSerializer):
+    completion_rate = serializers.FloatField(read_only=True)
+    no_show_rate = serializers.FloatField(read_only=True)
+
+    class Meta:
+        model = SystemMetrics
+        fields = ['id', 'date', 'total_appointments', 'completed_appointments',
+                 'canceled_appointments', 'no_show_appointments', 'completion_rate',
+                 'no_show_rate', 'created_at']

@@ -29,6 +29,21 @@
 
         <input type="password" v-model="password" placeholder="密码" />
         <input type="password" v-model="confirm" placeholder="确认密码" />
+        
+        <!-- 角色选择 -->
+        <select v-model="role">
+          <option value="patient">患者</option>
+          <option value="doctor">医生</option>
+          <option value="administrator">管理员</option>
+        </select>
+
+        <!-- 管理员注册码输入框 -->
+        <input 
+          v-if="role === 'administrator'"
+          type="password" 
+          v-model="adminCode" 
+          placeholder="请输入管理员注册码" 
+        />
       </div>
 
       <button class="register-btn" @click="submit">注册</button>
@@ -51,6 +66,8 @@ const gender = ref('')
 const age = ref('')
 const password = ref('')
 const confirm = ref('')
+const role = ref('patient') // 默认选择患者角色
+const adminCode = ref('') // 管理员注册码
 const router = useRouter()
 
 const submit = async () => {
@@ -87,7 +104,8 @@ const submit = async () => {
       gender: gender.value === '男' ? 'M' : 'F',
       age: age.value,
       password: password.value,
-      role: 'patient' // ✅ 固定为患者注册
+      role: role.value,
+      admin_code: role.value === 'admin' ? adminCode.value : undefined // 如果是管理员注册，发送注册码
     })
 
     if (res.data.status === 'success') {

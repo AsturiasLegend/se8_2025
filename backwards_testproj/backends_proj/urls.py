@@ -1,5 +1,13 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 from backends_proj import views
+from .views import admin_views
+
+router = DefaultRouter()
+router.register(r'departments', admin_views.DepartmentViewSet)
+router.register(r'doctor-departments', admin_views.DoctorDepartmentViewSet)
+router.register(r'department-schedules', admin_views.DepartmentScheduleViewSet)
+router.register(r'system-metrics', admin_views.SystemMetricsViewSet)
 
 urlpatterns = [path('login/', views.users.login),
                path('register/', views.users.register),
@@ -20,4 +28,7 @@ urlpatterns = [path('login/', views.users.login),
                 path('patient/cancel/', views.patients.cancel_registration, name='cancel_registration'),
                 path('patient/order-detail/', views.patients.get_order_detail, name='get_order_detail'),
                 path('patient/profile/', views.patients.get_patient_profile, name='get_patient_profile'),
+
+                path('admin/', include(router.urls)),
                ] # 需要填充路由接口，注意方法的名称本身组成路径的一部分
+
