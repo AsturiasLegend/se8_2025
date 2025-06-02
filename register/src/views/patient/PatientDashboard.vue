@@ -2,6 +2,12 @@
   <div class="dashboard-wrapper">
     <TopBar title="用户挂号主页" />
 
+    <div class="btn-container">
+      <button class="register-btn" @click="goRegister">去挂号</button>
+      <button class="profile-btn" @click="goProfile">基本信息</button> <!-- 新增按钮 -->
+    </div>
+
+
     <div class="content">
       <div class="record-box">
         <h3>📋 您的挂号记录如下：</h3>
@@ -82,6 +88,10 @@ const goRegister = () => {
 
 const goHelp = () => {
   router.push('/patient/help')
+}
+
+const goProfile = () => {
+  router.push('/patient/profile')
 }
 
 onMounted(fetchRecords)
@@ -178,5 +188,20 @@ onMounted(fetchRecords)
 }
 .help-btn:hover {
   background-color: #495057;
+}
+
+.profile-btn {
+  padding: 12px 24px;
+  background-color: #28a745;
+  border: none;
+  color: white;
+  font-size: 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s;
+  margin-left: 20px; /* 与前一按钮留间距 */
+}
+.profile-btn:hover {
+  background-color: #1e7e34;
 }
 </style>
